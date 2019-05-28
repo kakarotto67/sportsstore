@@ -1,8 +1,59 @@
 import { Product } from "./product.model";
+import { Injectable } from "@angular/core";
+import { Http, RequestMethod, Request, Response } from "@angular/http";
+import { Observable } from "rxjs/Observable";
+import "rxjs/add/operator/map";
+import { Filter } from "./configClasses.repository";
 
+const productsUrl = "/api/products";
+
+@Injectable()
 export class Repository {
-    constructor() {
-        this.product = JSON.parse(document.getElementById("data").textContent);
+  private filterObject = new Filter();
+
+  product: Product;
+  products: Product[];
+
+  constructor(private http: Http) {
+    this.filter.category = "Soccer";
+    this.filter.related = true;
+
+    this.getProducts();
+  }
+
+  getProduct(id: number) {
+    this.sendRequest(RequestMethod.Get, productsUrl + "/" + id).subscribe(
+      response => (this.product = response.json)
+    );
+  }
+
+  getProducts() {
+    let url = productsUrl + "/" + "?related=" + this.filter.related;
+
+    if (this.filter.category) {
+      url += "&category=" + this.filter.category;
     }
-    product: Product;
+
+    if (this.filter.search) {
+      url += "&search=" + this.filter.search;
+    }
+
+    this.sendRequest(RequestMethod.Get, url).subscribe(response => (this.products = response));
+  }
+
+  get filter(): Filter {
+    return this.filterObject;
+  }
+
+  private sendRequest(verb: RequestMethod, url: string, data?: any): Observable<any> {
+    return this.http
+      .request(
+        new Request({
+          method: verb,
+          url: url,
+          body: data
+        })
+      )
+      .map(response => response.json());
+  }
 }
