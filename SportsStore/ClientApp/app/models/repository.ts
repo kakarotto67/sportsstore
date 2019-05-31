@@ -26,7 +26,7 @@ export class Repository {
 
   getProduct(id: number) {
     this.sendRequest(RequestMethod.Get, productsUrl + "/" + id).subscribe(
-      response => (this.product = response.json)
+      response => (this.product = response)
     );
   }
 

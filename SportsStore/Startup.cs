@@ -34,7 +34,8 @@ namespace SportsStore
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration["Data:Products:ConnectionString"]));
             // Add framework services.
             services.AddMvc()
-            .AddJsonOptions(opts => {
+            .AddJsonOptions(opts =>
+            {
                 opts.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
                 opts.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
@@ -68,6 +69,9 @@ namespace SportsStore
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
+
+                // Use angular fallback page for 404 requests (direct url access)
+                routes.MapSpaFallbackRoute("angular-fallback", new { controller = "Home", action = "Index" });
             });
 
             SeedData.SeedDatabase(app.ApplicationServices.GetRequiredService<DataContext>());
