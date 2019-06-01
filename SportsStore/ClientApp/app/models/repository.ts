@@ -16,6 +16,7 @@ export class Repository {
   product: Product;
   products: Product[];
   suppliers: Supplier[] = [];
+  categories: string[] = [];
 
   constructor(private http: Http) {
     //this.filter.category = "Soccer";
@@ -41,7 +42,12 @@ export class Repository {
       url += "&search=" + this.filter.search;
     }
 
-    this.sendRequest(RequestMethod.Get, url).subscribe(response => (this.products = response));
+    url += "&metadata=true";
+
+    this.sendRequest(RequestMethod.Get, url).subscribe(response => {
+      this.products = response.data;
+      this.categories = response.categories;
+    });
   }
 
   getSuppliers() {
@@ -123,8 +129,8 @@ export class Repository {
   }
 
   deleteProduct(id: number) {
-    this.sendRequest(RequestMethod.Delete, productsUrl + "/" + id).subscribe(response =>
-      this.getProducts() // this is inneficient since additional call is made after DELETE request
+    this.sendRequest(RequestMethod.Delete, productsUrl + "/" + id).subscribe(
+      response => this.getProducts() // this is inneficient since additional call is made after DELETE request
     );
   }
 

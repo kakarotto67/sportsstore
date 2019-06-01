@@ -298,6 +298,24 @@ var CategoryFilterComponent = (function () {
     function CategoryFilterComponent(repo) {
         this.repo = repo;
     }
+    Object.defineProperty(CategoryFilterComponent.prototype, "categories", {
+        get: function () {
+            return this.repo.categories;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryFilterComponent.prototype, "currentCategory", {
+        get: function () {
+            return this.repo.filter.category;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CategoryFilterComponent.prototype.setCurrentCategory = function (newCategory) {
+        this.repo.filter.category = newCategory;
+        this.repo.getProducts();
+    };
     return CategoryFilterComponent;
 }());
 CategoryFilterComponent = __decorate([
@@ -509,7 +527,7 @@ module.exports = "<h5>Placeholder: Cart Summary</h5>\r\n"
 /***/ 116:
 /***/ (function(module, exports) {
 
-module.exports = "<h3>Placeholder: Category Filter</h3>\r\n"
+module.exports = "<div class=\"m-1\">\r\n  <button class=\"btn btn-outline-primary btn-block\" (click)=\"setCurrentCategory(null)\">\r\n    All Categories\r\n  </button>\r\n  <button\r\n    *ngFor=\"let category of categories\"\r\n    class=\"btn btn-outline-primary btn-block\"\r\n    [class.active]=\"currentCategory == category\"\r\n    (click)=\"setCurrentCategory(category)\">\r\n    {{ category }}\r\n  </button>\r\n</div>\r\n"
 
 /***/ }),
 
@@ -523,7 +541,7 @@ module.exports = "<h3>Placeholder: Page Controls</h3>\r\n"
 /***/ 118:
 /***/ (function(module, exports) {
 
-module.exports = "<h3>Placeholder: Product List</h3>\r\n"
+module.exports = "<div *ngIf=\"products?.length > 0; else nodata\">\r\n  <div *ngFor=\"let product of products\" class=\"card card-outline-primary m-1\">\r\n    <div class=\"card-header\">\r\n      <span class=\"h4\">{{ product.name }}</span>\r\n      <span class=\"float-right badge badge-pill badge-primary\">\r\n        {{ product.price | currency: \"USD\":true }}\r\n      </span>\r\n    </div>\r\n    <div class=\"card-block\">\r\n      <span class=\"card-text p-a-1\">{{ product.description }}</span>\r\n      <button class=\"float-right btn btn-sm btn-success\" (click)=\"addToCart(product)\">\r\n        Add to Cart\r\n      </button>\r\n    </div>\r\n  </div>\r\n</div>\r\n<ng-template #nodata>\r\n  <h4 class=\"m-1\">Waiting for data...</h4>\r\n</ng-template>\r\n"
 
 /***/ }),
 
@@ -571,6 +589,7 @@ var Repository = (function () {
         this.http = http;
         this.filterObject = new __WEBPACK_IMPORTED_MODULE_3__configClasses_repository__["a" /* Filter */]();
         this.suppliers = [];
+        this.categories = [];
         //this.filter.category = "Soccer";
         this.filter.related = true;
         this.getProducts();
@@ -588,7 +607,11 @@ var Repository = (function () {
         if (this.filter.search) {
             url += "&search=" + this.filter.search;
         }
-        this.sendRequest(__WEBPACK_IMPORTED_MODULE_1__angular_http__["b" /* RequestMethod */].Get, url).subscribe(function (response) { return (_this.products = response); });
+        url += "&metadata=true";
+        this.sendRequest(__WEBPACK_IMPORTED_MODULE_1__angular_http__["b" /* RequestMethod */].Get, url).subscribe(function (response) {
+            _this.products = response.data;
+            _this.categories = response.categories;
+        });
     };
     Repository.prototype.getSuppliers = function () {
         var _this = this;
@@ -659,9 +682,7 @@ var Repository = (function () {
     };
     Repository.prototype.deleteProduct = function (id) {
         var _this = this;
-        this.sendRequest(__WEBPACK_IMPORTED_MODULE_1__angular_http__["b" /* RequestMethod */].Delete, productsUrl + "/" + id).subscribe(function (response) {
-            return _this.getProducts();
-        } // this is inneficient since additional call is made after DELETE request
+        this.sendRequest(__WEBPACK_IMPORTED_MODULE_1__angular_http__["b" /* RequestMethod */].Delete, productsUrl + "/" + id).subscribe(function (response) { return _this.getProducts(); } // this is inneficient since additional call is made after DELETE request
         );
     };
     Repository.prototype.deleteSupplier = function (id) {
