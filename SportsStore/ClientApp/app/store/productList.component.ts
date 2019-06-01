@@ -10,6 +10,10 @@ export class ProductListComponent {
   constructor(private repo: Repository) {}
 
   get products(): Product[] {
-    return this.repo.products;
+    if (this.repo.products != null && this.repo.products.length > 0) {
+      let pageIndex = (this.repo.pagination.currentPage - 1) * this.repo.pagination.productsPerPage;
+      // get sub array of products from current page index to products per page value
+      return this.repo.products.slice(pageIndex, pageIndex + this.repo.pagination.productsPerPage);
+    }
   }
 }

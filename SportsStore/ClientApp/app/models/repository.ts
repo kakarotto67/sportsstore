@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { Http, RequestMethod, Request, Response } from "@angular/http";
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/operator/map";
-import { Filter } from "./configClasses.repository";
+import { Filter, Pagination } from "./configClasses.repository";
 import { Supplier } from "./supplier.model";
 
 const productsUrl = "/api/products";
@@ -12,6 +12,7 @@ const suppliersUrl = "/api/suppliers";
 @Injectable()
 export class Repository {
   private filterObject = new Filter();
+  private paginationObject = new Pagination();
 
   product: Product;
   products: Product[];
@@ -47,6 +48,7 @@ export class Repository {
     this.sendRequest(RequestMethod.Get, url).subscribe(response => {
       this.products = response.data;
       this.categories = response.categories;
+      this.pagination.currentPage = 1;
     });
   }
 
@@ -143,6 +145,10 @@ export class Repository {
 
   get filter(): Filter {
     return this.filterObject;
+  }
+
+  get pagination(): Pagination {
+    return this.paginationObject;
   }
 
   /* Private Methods */
