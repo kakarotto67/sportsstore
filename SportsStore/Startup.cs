@@ -32,12 +32,28 @@ namespace SportsStore
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration["Data:Products:ConnectionString"]));
+
             // Add framework services.
             services.AddMvc()
             .AddJsonOptions(opts =>
             {
                 opts.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
                 opts.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            });
+
+            // To use separate table for session
+            services.AddDistributedSqlServerCache(options =>
+            {
+                options.ConnectionString = Configuration["Data:Products:ConnectionString"];
+                options.SchemaName = "dbo";
+                options.TableName = "SessionData";
+            });
+
+            services.AddSession(options =>
+            {
+                options.CookieName = "SportsStore.Session";
+                options.IdleTimeout = System.TimeSpan.FromHours(48);
+                options.CookieHttpOnly = false;
             });
         }
 
@@ -64,6 +80,8 @@ namespace SportsStore
 
             app.UseStaticFiles();
 
+            app.UseSession();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -74,6 +92,7 @@ namespace SportsStore
                 routes.MapSpaFallbackRoute("angular-fallback", new { controller = "Home", action = "Index" });
             });
 
+            // To create database if not exist and add test data
             SeedData.SeedDatabase(app.ApplicationServices.GetRequiredService<DataContext>());
         }
     }
