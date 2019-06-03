@@ -5,9 +5,11 @@ import { Observable } from "rxjs/Observable";
 import "rxjs/add/operator/map";
 import { Filter, Pagination } from "./configClasses.repository";
 import { Supplier } from "./supplier.model";
+import { Order } from "./order.model";
 
 const productsUrl = "/api/products";
 const suppliersUrl = "/api/suppliers";
+const ordersUrl = "/api/orders";
 
 @Injectable()
 export class Repository {
@@ -18,6 +20,7 @@ export class Repository {
   products: Product[];
   suppliers: Supplier[] = [];
   categories: string[] = [];
+  orders: Order[] = [];
 
   constructor(private http: Http) {
     //this.filter.category = "Soccer";
@@ -151,6 +154,29 @@ export class Repository {
 
   getSessionData(dataType: string): Observable<any> {
     return this.sendRequest(RequestMethod.Get, "/api/session/" + dataType);
+  }
+
+  getOrders() {
+    this.sendRequest(RequestMethod.Get, ordersUrl).subscribe(data => (this.orders = data));
+  }
+
+  createOrder(order: Order) {
+    this.sendRequest(RequestMethod.Post, ordersUrl, {
+      name: order.name,
+      address: order.address,
+      payment: order.payment,
+      products: order.products
+    }).subscribe(data => {
+      order.orderConfirmation = data;
+      order.cart.clear();
+      order.clear();
+    });
+  }
+
+  shipOrder(order: Order) {
+    this.sendRequest(RequestMethod.Post, ordersUrl + "/" + order.orderId).subscribe(r =>
+      this.getOrders()
+    );
   }
 
   get filter(): Filter {

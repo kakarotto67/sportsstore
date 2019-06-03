@@ -9,6 +9,10 @@ import { ProductSelectionComponent } from "./productSelection.component";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { CartDetailComponent } from "./cardDetail.component";
+import { OrderConfirmationComponent } from "./checkout/orderConfirmation.component";
+import { CheckoutDetailsComponent } from "./checkout/checkoutDetails.component";
+import { CheckoutPaymentComponent } from "./checkout/checkoutPayment.component";
+import { CheckoutSummaryComponent } from "./checkout/checkoutSummary.component";
 
 @NgModule({
   declarations: [
@@ -18,7 +22,11 @@ import { CartDetailComponent } from "./cardDetail.component";
     ProductListComponent,
     RatingsComponent,
     ProductSelectionComponent,
-    CartDetailComponent
+    CartDetailComponent,
+    CheckoutDetailsComponent,
+    CheckoutPaymentComponent,
+    CheckoutSummaryComponent,
+    OrderConfirmationComponent
   ],
   imports: [BrowserModule, RouterModule, FormsModule],
   exports: [ProductSelectionComponent]
