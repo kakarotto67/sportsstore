@@ -1,0 +1,34 @@
+<div class="navbar bg-info mb-1">
+  <a class="navbar-brand text-white">SPORTS STORE Admin</a>
+</div>
+<div class="row no-gutters">
+  <div class="col-3">
+    <!-- use exact true so only when link is fully /admin
+        the class active will be applied (since there are more links that starts with /admin)  -->
+    <button
+      class="btn btn-block btn-outline-info"
+      routerLink="/admin"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Overview
+    </button>
+    <button
+      class="btn btn-block btn-outline-info"
+      routerLink="/admin/products"
+      routerLinkActive="active"
+    >
+      Products
+    </button>
+    <button
+      class="btn btn-block btn-outline-info"
+      routerLink="/admin/orders"
+      routerLinkActive="active"
+    >
+      Orders
+    </button>
+  </div>
+  <div class="col p-2">
+    <router-outlet></router-outlet>
+  </div>
+</div>

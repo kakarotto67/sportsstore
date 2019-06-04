@@ -6,6 +6,8 @@ import "rxjs/add/operator/map";
 import { Filter, Pagination } from "./configClasses.repository";
 import { Supplier } from "./supplier.model";
 import { Order } from "./order.model";
+import { ValidationError } from "../errorHandler.service";
+import "rxjs/add/operator/catch";
 
 const productsUrl = "/api/products";
 const suppliersUrl = "/api/suppliers";
@@ -190,14 +192,33 @@ export class Repository {
   /* Private Methods */
 
   private sendRequest(verb: RequestMethod, url: string, data?: any): Observable<any> {
-    return this.http
-      .request(
-        new Request({
-          method: verb,
-          url: url,
-          body: data
+    return (
+      this.http
+        .request(
+          new Request({
+            method: verb,
+            url: url,
+            body: data
+          })
+        )
+        .map(response => (response.headers.get("Content-Length") != "0" ? response.json() : null))
+        // handler errors on send request
+        .catch((errorResponse: Response) => {
+          if (errorResponse.status == 400) {
+            let jsonData: string;
+
+            try {
+              jsonData = errorResponse.json();
+            } catch (e) {
+              throw new Error("Network Error");
+            }
+
+            let messages = Object.getOwnPropertyNames(jsonData).map(p => jsonData[p]);
+            throw new ValidationError(messages);
+          }
+
+          throw new Error("Network Error");
         })
-      )
-      .map(response => (response.headers.get("Content-Length") != "0" ? response.json() : null));
+    );
   }
 }
