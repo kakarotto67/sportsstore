@@ -189,6 +189,14 @@ export class Repository {
     return this.paginationObject;
   }
 
+  login(name: string, password: string): Observable<Response> {
+    return this.http.post("/api/account/login", { name: name, password: password });
+  }
+
+  logout() {
+    this.http.post("/api/account/logout", null).subscribe(respone => {});
+  }
+
   /* Private Methods */
 
   private sendRequest(verb: RequestMethod, url: string, data?: any): Observable<any> {

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsStore.Models;
@@ -7,6 +8,7 @@ using System.Linq;
 namespace SportsStore.Controllers
 {
     [Route("/api/orders")]
+    [Authorize(Roles = "Administrator")]
     public class OrderValuesController : Controller
     {
         private DataContext context;
@@ -34,6 +36,7 @@ namespace SportsStore.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult CreateOrder([FromBody] Order order)
         {
             if (ModelState.IsValid)

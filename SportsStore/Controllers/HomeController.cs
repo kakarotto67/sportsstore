@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SportsStore.Models;
 
@@ -20,6 +21,13 @@ namespace SportsStore.Controllers
             var model = context.Products.FirstOrDefault();
 
             return View(model);
+        }
+
+        // Just for testing
+        [Authorize]
+        public string Protected()
+        {
+            return "You have been authenticated";
         }
     }
 }

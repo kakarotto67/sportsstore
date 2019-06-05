@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using SportsStore.Models.BindingTargets;
 namespace SportsStore.Controllers
 {
     [Route("api/products")]
+    [Authorize(Roles = "Administrator")]
     public class ProductValuesController : Controller
     {
         private DataContext context;
@@ -21,14 +23,21 @@ namespace SportsStore.Controllers
 
         // Get product using .../api/products/{id}
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public Product GetProduct(long id)
         {
             // Effect of 1 sec delay
             //System.Threading.Thread.Sleep(1000);
 
-            var result = context.Products
-                .Include(p => p.Supplier).ThenInclude(s => s.Products)
-                .Include(p => p.Ratings).FirstOrDefault(p => p.ProductId == id);
+            IQueryable<Product> query = context.Products.Include(p => p.Ratings);
+
+            if (HttpContext.User.IsInRole("Administrator"))
+            {
+                query = query.Include(p => p.Supplier)
+                .ThenInclude(s => s.Products);
+            }
+
+            var result = query.FirstOrDefault(p => p.ProductId == id);
 
             if (result != null)
             {
@@ -57,6 +66,7 @@ namespace SportsStore.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetProducts(string category, string search, bool related = false, bool metadata = false)
         {
             IQueryable<Product> query = context.Products;
@@ -73,7 +83,7 @@ namespace SportsStore.Controllers
                 query = query.Where(p => p.Name.ToLower().Contains(searchLower) || p.Description.ToLower().Contains(searchLower));
             }
 
-            if (related)
+            if (related && HttpContext.User.IsInRole("Administrator"))
             {
                 query = query.Include(p => p.Supplier).Include(p => p.Ratings);
                 var data = query.ToList();

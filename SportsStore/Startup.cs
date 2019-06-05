@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using SportsStore.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace SportsStore
 {
@@ -31,6 +33,11 @@ namespace SportsStore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Db context for identity db (users and roles)
+            services.AddDbContext<IdentityDataContext>(options => options.UseSqlServer(Configuration["Data:Identity:ConnectionString"]));
+            // Setup ASP.NET Core Identity to use specified db context
+            services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<IdentityDataContext>();
+
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration["Data:Products:ConnectionString"]));
 
             // Add framework services.
@@ -54,6 +61,27 @@ namespace SportsStore
                 options.CookieName = "SportsStore.Session";
                 options.IdleTimeout = System.TimeSpan.FromHours(48);
                 options.CookieHttpOnly = false;
+            });
+
+            // To prevent redirects on login
+            services.Configure<IdentityOptions>(config =>
+            {
+                config.Cookies.ApplicationCookie.Events =
+                new CookieAuthenticationEvents
+                {
+                    OnRedirectToLogin = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/api") && context.Response.StatusCode == 200)
+                        {
+                            context.Response.StatusCode = 401;
+                        }
+                        else
+                        {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
+                        return Task.FromResult<object>(null);
+                    }
+                };
             });
         }
 
@@ -82,6 +110,9 @@ namespace SportsStore
 
             app.UseSession();
 
+            // Use ASP.NET Core Identity
+            app.UseIdentity();
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
@@ -94,6 +125,9 @@ namespace SportsStore
 
             // To create database if not exist and add test data
             SeedData.SeedDatabase(app.ApplicationServices.GetRequiredService<DataContext>());
+
+            // To initialize identity databsae with test data
+            IdentitySeedData.SeedDatabase(app);
         }
     }
 }

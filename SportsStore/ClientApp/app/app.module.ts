@@ -13,6 +13,7 @@ import { StoreModule } from "./store/store.module";
 import { ProductSelectionComponent } from "./store/productSelection.component";
 import { AdminModule } from "./admin/admin.module";
 import { ErrorHandlerService } from "./errorHandler.service";
+import { AuthModule } from "./auth/auth.module";
 
 const eHandler = new ErrorHandlerService();
 
@@ -29,7 +30,8 @@ export function handler() {
     ModelModule,
     RoutingConfig,
     StoreModule,
-    AdminModule
+    AdminModule,
+    AuthModule
   ],
   providers: [
     { provide: ErrorHandlerService, useFactory: handler },

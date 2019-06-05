@@ -11,10 +11,15 @@ import { AdminComponent } from "./admin/admin.component";
 import { ProductAdminComponent } from "./admin/productAdmin.component";
 import { OrderAdminComponent } from "./admin/orderAdmin.component";
 import { OverviewComponent } from "./admin/overview.component";
+import { AuthenticationComponent } from "./auth/authentication.component";
+import { AuthenticationGuard } from "./auth/authentication.guard";
 
 const routes: Routes = [
+  { path: "login", component: AuthenticationComponent },
+  { path: "admin", redirectTo: "/admin/overview", pathMatch: "full" },
   {
     path: "admin",
+    canActivateChild: [AuthenticationGuard],
     component: AdminComponent,
     children: [
       { path: "products", component: ProductAdminComponent },
